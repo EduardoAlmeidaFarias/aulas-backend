@@ -1,5 +1,12 @@
 import express from "express";
 
+function validaParametro(parametro_a_ser_validado) {
+  console.log(parametro_a_ser_validado);
+  const numero = parseInt(parametro_a_ser_validado);
+  let retorno = isNaN(numero);
+  console.log(retorno);
+}
+
 const app = express(); //primeiro pilar: instancia do express
 app.use(express.json());
 /**
@@ -23,14 +30,13 @@ app.get("/", function (req, res) {
 });
 
 app.get("/livros", function (req, res) {
-  console.log("chamando rota GET /livros");
   res.json(livros);
 });
 
 app.get("/livros/:id", (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = req.params.id;
 
-  if (isNaN(id)) {
+  if (validaParametro(id)) {
     //se nao for um numero
     return res
       .status(400) //requisicao mal formada
@@ -41,7 +47,7 @@ app.get("/livros/:id", (req, res) => {
     return livro.idLivro === id;
   });
 
-  if (!livro) {
+  if (livro === undefined) {
     return res.status(404).send();
   }
 
@@ -73,21 +79,63 @@ app.post("/livros", (req, res) => {
   res.status(201).json(novo_livro);
 });
 
+app.delete("/livros/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+
+  if (isNaN(id)) {
+    return res
+      .status(400)
+      .json({ mensagem: "identificador deve ser um numero" });
+  }
+
+  let index_livro = livros.findIndex((livro) => {
+    return livro.idLivro === id;
+  });
+
+  if (index_livro === -1) {
+    return res.status(404).send();
+  }
+
+  livros.splice(index_livro, 1);
+
+  res.sendStatus(204);
+});
+
+app.patch("/livros/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const novo_titulo = req.body.dsTitulo;
+  const novo_autor = req.body.dsAutor;
+
+  if (isNaN(id)) {
+    return res
+      .status(400)
+      .json({ mensagem: "identificador precisa ser um numero valido" });
+  }
+
+  let index_livro = livros.findIndex((livro) => {
+    return livro.idLivro === id;
+  });
+
+  if (index_livro === -1) {
+    return res.sendStatus(404);
+  }
+
+  let livro_a_ser_atualizado = livros[index_livro];
+
+  if (novo_autor !== undefined) {
+    livro_a_ser_atualizado.dsAutor = novo_autor;
+  }
+
+  if (novo_titulo !== undefined) {
+    livro_a_ser_atualizado.dsTitulo = novo_titulo;
+  }
+});
+
 app.listen(3000); //terceiro pilar: porta a ser ouvida
 
 /*
-cadastrar livros
-  POST
 
-buscar todos livros
-buscar um livro pelo id
-  GET
-
-emprestar livro
 devolver livro
   PUT/PATCH
 
-
-deletar livro
-  DELETE
 */
