@@ -1,14 +1,9 @@
 import express from "express";
-
-function validaParametro(parametro_a_ser_validado) {
-  console.log(parametro_a_ser_validado);
-  const numero = parseInt(parametro_a_ser_validado);
-  let retorno = isNaN(numero);
-  console.log(retorno);
-}
+import cors from "cors";
 
 const app = express(); //primeiro pilar: instancia do express
 app.use(express.json());
+app.use(cors());
 /**
  * idLivro -> identificador / int
  * dsTitulo -> string
@@ -26,7 +21,7 @@ let livros = [
 ]; //banco de dados
 
 app.get("/", function (req, res) {
-  res.send("seja bem vindo à gestao de livros");
+  res.send("Seja bem vindo à gestao de livros");
 });
 
 app.get("/livros", function (req, res) {
@@ -34,13 +29,12 @@ app.get("/livros", function (req, res) {
 });
 
 app.get("/livros/:id", (req, res) => {
-  const id = req.params.id;
+  const id = parseInt(req.params.id);
 
-  if (validaParametro(id)) {
-    //se nao for um numero
+  if (isNaN(id)) {
     return res
-      .status(400) //requisicao mal formada
-      .json({ mensagem: "o parametro precisa ser um numero valido" });
+      .status(400)
+      .json({ mensagem: "identificador deve ser um numero" });
   }
 
   let livro = livros.find((livro) => {
@@ -51,12 +45,15 @@ app.get("/livros/:id", (req, res) => {
     return res.status(404).send();
   }
 
-  res.json(livro);
+  let array = [livro];
+  res.json(array);
 });
 
 app.post("/livros", (req, res) => {
   let autor_enviado = req.body.dsAutor;
   let titulo_enviado = req.body.dsTitulo;
+
+  console.log(req.body);
 
   if (!autor_enviado || !titulo_enviado) {
     return res
@@ -129,6 +126,8 @@ app.patch("/livros/:id", (req, res) => {
   if (novo_titulo !== undefined) {
     livro_a_ser_atualizado.dsTitulo = novo_titulo;
   }
+
+  res.sendStatus(204);
 });
 
 app.listen(3000); //terceiro pilar: porta a ser ouvida
