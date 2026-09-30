@@ -25,13 +25,14 @@ app.get("/", function (req, res) {
 });
 
 app.get("/livros", function (req, res) {
+  console.log("chamando rota GET /livros");
   res.json(livros);
 });
 
-app.get("/livros/:id", (req, res) => {
+app.get("/livros/:id", (req, res) => { 
   const id = parseInt(req.params.id);
 
-  if (isNaN(id)) {
+  if (isNaN(id)) { //se nao for um numero
     return res
       .status(400)
       .json({ mensagem: "identificador deve ser um numero" });
@@ -130,11 +131,49 @@ app.patch("/livros/:id", (req, res) => {
   res.sendStatus(204);
 });
 
+app.patch("/livros/:id/emprestar", (req, res) => {
+  const id = parseInt(req.params.id);
+
+  if (isNaN(id)) {
+    return res
+      .status(400)
+      .json({ mensagem: "precisa ser um numero valido" });
+  }
+
+  const livro = livros.find((l) => l.idLivro === id);
+
+  if (!livro) {
+    return res.status(404).json({ mensagem: "livro nao encontrado" });
+  }
+
+  if (!livro.fgDisponivel) { //conflito de versao
+    return res.status(409).json({ mensagem: "livro ja esta emprestado" });
+  }
+
+  livro.fgDisponivel = false;
+  res.json(livro);
+});
+
+app.patch("/livros/:id/devolver", (req, res) => {
+  const id = parseInt(req.params.id);
+
+  if (isNaN(id)) {
+    return res
+      .status(400)
+      .json({ mensagem: "precisa ser um numero valido" });
+  }
+  const livro = livros.find((l) => l.idLivro === id);
+
+  if (!livro) {
+    return res.status(404).json({ mensagem: "livro nao encontrado" });
+  }
+
+  if (livro.fgDisponivel) {
+    return res.status(409).json({ mensagem: "livro ja esta disponivel" });
+  }
+
+  livro.fgDisponivel = true;
+  res.json(livro);
+});
+
 app.listen(3000); //terceiro pilar: porta a ser ouvida
-
-/*
-
-devolver livro
-  PUT/PATCH
-
-*/
