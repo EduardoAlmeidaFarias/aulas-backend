@@ -1,1 +1,0 @@
-Criando um arquivo de exemplo para um pull request na aula de infra no dia 08/07
