@@ -55,3 +55,25 @@ export function editarLivro(id, dados) {
 
   return livro;
 }
+
+export function emprestarLivro(id) {
+  const livro = livros.find((livro) => livro.idLivro === id);
+
+  if (!livro) {
+    return null;
+  }
+
+  livro.fgDisponivel = false;
+  return livro;
+}
+
+export function devolverLivro(id) {
+  const livro = livros.find((livro) => livro.idLivro === id);
+
+  if (!livro) {
+    return null;
+  }
+
+  livro.fgDisponivel = true;
+  return livro;
+}

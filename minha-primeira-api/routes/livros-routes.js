@@ -2,9 +2,11 @@ import Router from "express";
 import {
   criarLivro,
   deletarLivro,
+  devolverLivro,
+  editarLivro,
+  emprestarLivro,
   findAll,
   findOne,
-  editarLivro,
 } from "../controllers/livros-controller.js";
 
 const router = Router();
@@ -92,4 +94,51 @@ router.patch("/:id", (req, res) => {
 
   return res.status(200).json(livroEditado);//editado com sucesso, retornando o livro atualizado
 });
+
+router.patch("/:id/emprestar", (req, res) => {
+  const idLivro = parseInt(req.params.id);
+
+  if (isNaN(idLivro)) {
+    return res
+      .status(400)//id não é número
+      .json({ mensagem: "identificador deve ser um numero" });
+  }
+
+  const livro = findOne(idLivro);
+
+  if (!livro) {
+    return res.status(404).send();//livro não existe
+  }
+
+  if (!livro.fgDisponivel) {
+    return res.status(409).json({ mensagem: "livro já está emprestado" });
+  }
+
+  const livroEmprestado = emprestarLivro(idLivro);
+  return res.status(200).json(livroEmprestado);
+});//emprestar um livro já emprestado, ou devolver um que já está disponível
+
+router.patch("/:id/devolver", (req, res) => {
+  const idLivro = parseInt(req.params.id);
+
+  if (isNaN(idLivro)) {
+    return res
+      .status(400)
+      .json({ mensagem: "identificador deve ser um numero" });
+  }
+
+  const livro = findOne(idLivro);
+
+  if (!livro) {
+    return res.status(404).send();
+  }
+
+  if (livro.fgDisponivel) {
+    return res.status(409).json({ mensagem: "livro não está emprestado" });
+  }
+
+  const livroDevolvido = devolverLivro(idLivro);
+  return res.status(200).json(livroDevolvido);
+});//operação feita, retorna o livro atualizado
+
 export default router;
