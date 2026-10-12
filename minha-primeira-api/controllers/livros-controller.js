@@ -41,4 +41,17 @@ export function deletarLivro(id) {
 
   livros.splice(index_livro, 1);
 }
-function editarLivro() {}
+export function editarLivro(id, dados) {
+  const livro = livros.find((livro) => livro.idLivro === id);
+
+  if (!livro) {//não encontrou
+    return null;
+  }
+
+  //atualiza só o que foi enviado
+  if (dados.dsTitulo !== undefined) livro.dsTitulo = dados.dsTitulo;
+  if (dados.dsAutor !== undefined) livro.dsAutor = dados.dsAutor;
+  if (dados.fgDisponivel !== undefined) livro.fgDisponivel = dados.fgDisponivel;
+
+  return livro;
+}

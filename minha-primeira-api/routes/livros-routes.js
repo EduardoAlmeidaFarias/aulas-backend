@@ -4,6 +4,7 @@ import {
   deletarLivro,
   findAll,
   findOne,
+  editarLivro,
 } from "../controllers/livros-controller.js";
 
 const router = Router();
@@ -65,5 +66,30 @@ router.delete("/:id", (req, res) => {
   deletarLivro(idLivro);
   return res.status(204).send();
 });
-router.patch("/:id", (req, res) => {});
+
+router.patch("/:id", (req, res) => {
+  const idLivro = parseInt(req.params.id);
+
+  if (isNaN(idLivro)) {
+    return res
+      .status(400)
+      .json({ mensagem: "identificador deve ser um numero" });
+  }
+
+  const { dsTitulo, dsAutor, fgDisponivel } = req.body;
+
+  if (dsTitulo === undefined && dsAutor === undefined && fgDisponivel === undefined) {
+    return res
+      .status(400)//id inválido ou nenhum campo enviado
+      .json({ mensagem: "envie ao menos um campo para editar" });
+  }
+
+  const livroEditado = editarLivro(idLivro, { dsTitulo, dsAutor, fgDisponivel });
+
+  if (!livroEditado) {
+    return res.status(404).send();//livro não existe
+  }
+
+  return res.status(200).json(livroEditado);//editado com sucesso, retornando o livro atualizado
+});
 export default router;
